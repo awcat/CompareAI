@@ -168,6 +168,7 @@ async function searchQuery() {
     try {
         console.log('Sending query:', query);
 
+        // Save the query
         const saveResponse = await fetch('http://localhost:3000/api/save-query', {
             method: 'POST',
             headers: {
@@ -176,8 +177,10 @@ async function searchQuery() {
             body: JSON.stringify({ query })
         });
 
-        console.log('Save Response:', await saveResponse.json());
+        const saveResult = await saveResponse.json();
+        console.log('Save Response:', saveResult);
 
+        // Fetch results
         const fetchResponse = await fetch('http://localhost:3000/api/get-results', {
             method: 'POST',
             headers: {
