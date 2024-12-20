@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const fetch = require('node-fetch');
+const cors = require('cors');
+app.use(cors());
 
 const app = express();
 app.use(bodyParser.json());
