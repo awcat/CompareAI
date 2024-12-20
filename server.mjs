@@ -1,11 +1,17 @@
-import dotenv from 'dotenv';
-import fetch from 'node-fetch';
 import express from 'express';
 import bodyParser from 'body-parser';
 import sqlite3 from 'sqlite3';
+import fetch from 'node-fetch';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
+
+// Enable CORS for all origins
+app.use(cors());
 
 // Connect to SQLite database
 const db = new sqlite3.Database('./queries.db', (err) => {
@@ -34,14 +40,16 @@ const db = new sqlite3.Database('./queries.db', (err) => {
 app.post('/api/save-query', (req, res) => {
     const { query } = req.body;
     if (!query) {
+        console.error('No query provided');
         return res.status(400).json({ error: 'Query is required' });
     }
 
     db.run('INSERT INTO queries (query) VALUES (?)', [query], (err) => {
         if (err) {
-            console.error(err.message);
+            console.error('Error saving query:', err.message);
             return res.status(500).json({ error: 'Failed to save query' });
         }
+        console.log('Query saved successfully');
         res.status(200).json({ message: 'Query saved successfully' });
     });
 });
@@ -49,6 +57,8 @@ app.post('/api/save-query', (req, res) => {
 // Fetch results from external APIs
 app.post('/api/get-results', async (req, res) => {
     const { query } = req.body;
+    console.log('Fetching results for query:', query);
+
     if (!query) {
         return res.status(400).json({ error: 'Query is required' });
     }
@@ -80,32 +90,21 @@ app.post('/api/get-results', async (req, res) => {
         const openAIData = await openAIResponse.json();
         const huggingFaceData = await huggingFaceResponse.json();
 
+        console.log('OpenAI Data:', openAIData);
+        console.log('HuggingFace Data:', huggingFaceData);
+
         res.status(200).json({
             result1: openAIData.choices?.[0]?.text || 'No data available',
             result2: huggingFaceData.generated_text || 'No data available',
             result3: `Summary: ${openAIData.choices?.[0]?.text || 'Not available'}`
         });
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching results:', error.message);
         res.status(500).json({ error: 'Failed to fetch results' });
     }
 });
 
-// Check if the database is running
-app.get('/api/check-db', (req, res) => {
-    db.get('SELECT name FROM sqlite_master WHERE type="table" AND name="queries"', (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: 'Database error', details: err.message });
-        }
-        if (row) {
-            res.status(200).json({ message: 'Database is running and table exists.' });
-        } else {
-            res.status(404).json({ message: 'Table "queries" does not exist.' });
-        }
-    });
-});
-
-// Health check for the server
+// Health check
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
