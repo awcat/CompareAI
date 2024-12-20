@@ -1,8 +1,8 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
-const fetch = require('node-fetch');
+import dotenv from 'dotenv';
+import fetch from 'node-fetch';
+import express from 'express';
+import bodyParser from 'body-parser';
+import sqlite3 from 'sqlite3';
 
 const app = express();
 app.use(bodyParser.json());
