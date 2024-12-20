@@ -167,8 +167,8 @@
 
         try {
             const responses = await Promise.all([
-                fetch(`https://api.example.com/${category}?sample=1`),
-                fetch(`https://api.example.com/${category}?sample=2`),
+                fetch(`https://api.openai.com/v1/completions`),
+                fetch(`https://api-inference.huggingface.co/models/<model-name>`),
                 fetch(`https://api.example.com/${category}?sample=3`)
             ]);
 
