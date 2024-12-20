@@ -158,59 +158,37 @@
 </footer>
 
 <script>
-    async function fetchResults(category) {
-        const placeholders = ['result-1', 'result-2', 'result-3'];
+    async function searchQuery() {
+    const query = document.getElementById('search-query').value;
+    if (!query) {
+        alert('Please enter a search query');
+        return;
+    }
 
-        placeholders.forEach(id => {
-            document.getElementById(id).textContent = "Loading...";
+    try {
+        // Save the query
+        await fetch('http://localhost:3000/api/save-query', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
         });
 
-        try {
-            const responses = await Promise.all([
-                fetch(`https://api.openai.com/v1/completions`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer YOUR_OPENAI_API_KEY`
-                    },
-                    body: JSON.stringify({
-                        model: "text-davinci-003",
-                        prompt: `Generate text for category: ${category}`,
-                        max_tokens: 50
-                    })
-                }),
-                fetch(`https://api-inference.huggingface.co/models/gpt2`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer YOUR_HUGGING_FACE_API_KEY`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ inputs: `Category: ${category}. Generate a result.` })
-                })
-            ]);
+        // Get results
+        const response = await fetch('http://localhost:3000/api/get-results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
 
-            const data = await Promise.all(responses.map(res => res.json()));
-
-            placeholders.forEach((id, index) => {
-                document.getElementById(id).textContent = data[index]?.choices?.[0]?.text || data[index]?.generated_text || "No data available";
-            });
-        } catch (error) {
-            placeholders.forEach(id => {
-                document.getElementById(id).textContent = "Error loading data";
-            });
-            console.error(error);
-        }
+        const data = await response.json();
+        document.getElementById('result-1').textContent = data.result1;
+        document.getElementById('result-2').textContent = data.result2;
+        document.getElementById('result-3').textContent = data.result3;
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while processing the query.');
     }
-
-    function searchQuery() {
-        const query = document.getElementById('search-query').value;
-        if (!query) {
-            alert('Please enter a search query');
-            return;
-        }
-        alert(`Search initiated for: ${query}`);
-        // Add logic to process the search query
-    }
+}
 </script>
 
 </body>
