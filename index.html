@@ -11,10 +11,11 @@
             margin: 0;
             padding: 0;
             line-height: 1.6;
+            background: #f7f8fa;
         }
 
         header {
-            background: #4CAF50;
+            background: #536878;
             color: white;
             padding: 20px 10px;
             text-align: center;
@@ -26,8 +27,6 @@
         }
 
         .categories button {
-            background: #4CAF50;
-            color: white;
             border: none;
             padding: 10px 15px;
             margin: 5px;
@@ -35,8 +34,55 @@
             border-radius: 5px;
         }
 
+        .categories button:nth-child(1) {
+            background: #ff6f61;
+            color: white;
+        }
+
+        .categories button:nth-child(2) {
+            background: #6baed6;
+            color: white;
+        }
+
+        .categories button:nth-child(3) {
+            background: #fcaf17;
+            color: white;
+        }
+
+        .categories button:nth-child(4) {
+            background: #8bc34a;
+            color: white;
+        }
+
+        .categories button:nth-child(5) {
+            background: #9c27b0;
+            color: white;
+        }
+
         .categories button:hover {
-            background: #45a049;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .search-box input {
+            width: 60%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-box button {
+            background: #536878;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            border-radius: 5px;
         }
 
         .results {
@@ -67,7 +113,7 @@
         }
 
         footer a {
-            color: #4CAF50;
+            color: #ff6f61;
             text-decoration: none;
         }
     </style>
@@ -84,6 +130,11 @@
     <button onclick="fetchResults('codes')">Codes</button>
     <button onclick="fetchResults('custom')">Custom</button>
     <button onclick="fetchResults('advanced')">Advanced</button>
+</section>
+
+<section class="search-box">
+    <input type="text" id="search-query" placeholder="Type your search here...">
+    <button onclick="searchQuery()">Search</button>
 </section>
 
 <section class="results">
@@ -133,8 +184,17 @@
             console.error(error);
         }
     }
+
+    function searchQuery() {
+        const query = document.getElementById('search-query').value;
+        if (!query) {
+            alert('Please enter a search query');
+            return;
+        }
+        alert(`Search initiated for: ${query}`);
+        // Add logic to process the search query
+    }
 </script>
 
 </body>
 </html>
-
