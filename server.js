@@ -1,24 +1,38 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
 const fetch = require('node-fetch');
 
 const app = express();
 app.use(bodyParser.json());
 
-const queries = []; // Temporary storage; replace with a database later
+// Connect to SQLite database
+const db = new sqlite3.Database('./queries.db', (err) => {
+    if (err) {
+        console.error('Failed to connect to the database:', err.message);
+    } else {
+        console.log('Connected to SQLite database.');
+    }
+});
 
-// Save query
+// Save query to database
 app.post('/api/save-query', (req, res) => {
     const { query } = req.body;
     if (!query) {
         return res.status(400).json({ error: 'Query is required' });
     }
-    queries.push({ query, timestamp: new Date() });
-    res.status(200).json({ message: 'Query saved successfully' });
+
+    db.run('INSERT INTO queries (query) VALUES (?)', [query], (err) => {
+        if (err) {
+            console.error(err.message);
+            return res.status(500).json({ error: 'Failed to save query' });
+        }
+        res.status(200).json({ message: 'Query saved successfully' });
+    });
 });
 
-// Get results
+// Fetch results from external APIs
 app.post('/api/get-results', async (req, res) => {
     const { query } = req.body;
     if (!query) {
@@ -61,11 +75,6 @@ app.post('/api/get-results', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Failed to fetch results' });
     }
-});
-
-// Health check
-app.get('/', (req, res) => {
-    res.send('Backend is running!');
 });
 
 // Start the server
