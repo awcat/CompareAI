@@ -3,8 +3,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const fetch = require('node-fetch');
-const cors = require('cors');
-app.use(cors());
 
 const app = express();
 app.use(bodyParser.json());
@@ -15,6 +13,20 @@ const db = new sqlite3.Database('./queries.db', (err) => {
         console.error('Failed to connect to the database:', err.message);
     } else {
         console.log('Connected to SQLite database.');
+        db.run(
+            `CREATE TABLE IF NOT EXISTS queries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                query TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`,
+            (tableErr) => {
+                if (tableErr) {
+                    console.error('Failed to create table:', tableErr.message);
+                } else {
+                    console.log('Table "queries" is ready.');
+                }
+            }
+        );
     }
 });
 
@@ -77,6 +89,25 @@ app.post('/api/get-results', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Failed to fetch results' });
     }
+});
+
+// Check if the database is running
+app.get('/api/check-db', (req, res) => {
+    db.get('SELECT name FROM sqlite_master WHERE type="table" AND name="queries"', (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: 'Database error', details: err.message });
+        }
+        if (row) {
+            res.status(200).json({ message: 'Database is running and table exists.' });
+        } else {
+            res.status(404).json({ message: 'Table "queries" does not exist.' });
+        }
+    });
+});
+
+// Health check for the server
+app.get('/', (req, res) => {
+    res.send('Server is running!');
 });
 
 // Start the server
