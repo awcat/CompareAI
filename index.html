@@ -158,37 +158,68 @@
 </footer>
 
 <script>
+    async function fetchResults(category) {
+        const placeholders = ['result-1', 'result-2', 'result-3'];
+
+        placeholders.forEach(id => {
+            document.getElementById(id).textContent = "Loading...";
+        });
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/get-results`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: category })
+            });
+
+            const data = await response.json();
+
+            document.getElementById('result-1').textContent = data.result1 || 'No data available';
+            document.getElementById('result-2').textContent = data.result2 || 'No data available';
+            document.getElementById('result-3').textContent = data.result3 || 'No data available';
+        } catch (error) {
+            placeholders.forEach(id => {
+                document.getElementById(id).textContent = "Error loading data";
+            });
+            console.error(error);
+        }
+    }
+
     async function searchQuery() {
-    const query = document.getElementById('search-query').value;
-    if (!query) {
-        alert('Please enter a search query');
-        return;
+        const query = document.getElementById('search-query').value;
+        if (!query) {
+            alert('Please enter a search query');
+            return;
+        }
+
+        try {
+            await fetch('http://localhost:3000/api/save-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            });
+
+            const response = await fetch('http://localhost:3000/api/get-results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query })
+            });
+
+            const data = await response.json();
+            document.getElementById('result-1').textContent = data.result1 || 'No data available';
+            document.getElementById('result-2').textContent = data.result2 || 'No data available';
+            document.getElementById('result-3').textContent = data.result3 || 'No data available';
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while processing the query.');
+        }
     }
-
-    try {
-        // Save the query
-        await fetch('http://localhost:3000/api/save-query', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
-        });
-
-        // Get results
-        const response = await fetch('http://localhost:3000/api/get-results', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
-        });
-
-        const data = await response.json();
-        document.getElementById('result-1').textContent = data.result1;
-        document.getElementById('result-2').textContent = data.result2;
-        document.getElementById('result-3').textContent = data.result3;
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while processing the query.');
-    }
-}
 </script>
 
 </body>
